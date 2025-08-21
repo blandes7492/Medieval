@@ -1,43 +1,76 @@
 // Setup platforms and enemies for each level
 function setupLevel(level, scene) {
-    // Remove old platforms and enemies
-    if (platforms) platforms.clear(true, true);
-    if (enemies) enemies.clear(true, true);
+	// Remove old platforms and enemies
+	if (platforms) platforms.clear(true, true);
+	if (enemies) enemies.clear(true, true);
 
-    platforms = scene.physics.add.staticGroup();
-    if (level === 1) {
-        platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-        platforms.create(600, 450, 'ground');
-        platforms.create(200, 350, 'ground');
-        platforms.create(400, 220, 'ground');
+	platforms = scene.physics.add.staticGroup();
+	if (level === 1) {
+		platforms.create(400, 584, 'platform_stone').setScale(2).refreshBody();
+		platforms.create(600, 450, 'platform_stone');
+		platforms.create(200, 350, 'platform_stone');
+		platforms.create(400, 220, 'platform_stone');
 
-        enemies = scene.physics.add.group();
-        enemies.create(600, 400, 'enemy');
-        enemies.create(200, 300, 'enemy');
-        enemies.create(400, 180, 'enemy');
-    } else if (level === 2) {
-        platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-        platforms.create(700, 500, 'ground');
-        platforms.create(100, 400, 'ground');
-        platforms.create(300, 300, 'ground');
-        platforms.create(600, 200, 'ground');
+		enemies = scene.physics.add.group();
+		enemies.create(600, 400, 'orc_tex');
+		enemies.create(200, 300, 'orc_tex');
+		enemies.create(400, 180, 'orc_tex');
+	} else if (level === 2) {
+		// Use stone platforms for level 2 as requested
+		platforms.create(400, 584, 'platform_stone').setScale(2).refreshBody();
+		platforms.create(700, 500, 'platform_stone');
+		platforms.create(100, 400, 'platform_stone');
+		platforms.create(300, 300, 'platform_stone');
+		platforms.create(600, 200, 'platform_stone');
 
-        enemies = scene.physics.add.group();
-        enemies.create(700, 480, 'enemy');
-        enemies.create(100, 380, 'enemy');
-        enemies.create(600, 180, 'enemy');
-        enemies.create(300, 280, 'enemy');
-    }
+		enemies = scene.physics.add.group();
+		enemies.create(700, 480, 'orc_tex');
+		enemies.create(100, 380, 'orc_tex');
+		enemies.create(600, 180, 'orc_tex');
+		enemies.create(300, 280, 'orc_tex');
+	} else if (level === 3) {
+		platforms.create(400, 584, 'platform_stone').setScale(2).refreshBody();
+		platforms.create(150, 500, 'platform_stone');
+		platforms.create(650, 400, 'platform_stone');
+		platforms.create(400, 300, 'platform_stone');
+		platforms.create(200, 200, 'platform_stone');
+		platforms.create(600, 120, 'platform_stone');
 
-    enemies.children.iterate(function(enemy) {
-        enemy.setCollideWorldBounds(true);
-        enemy.setBounce(1);
-        enemy.setVelocityX(enemySpeed);
-    });
+		enemies = scene.physics.add.group();
+		enemies.create(150, 480, 'orc_tex');
+		enemies.create(650, 380, 'orc_tex');
+		enemies.create(400, 280, 'orc_tex');
+		enemies.create(200, 180, 'orc_tex');
+		enemies.create(600, 100, 'orc_tex');
+	} else if (level === 4) {
+		platforms.create(400, 584, 'platform_stone').setScale(2).refreshBody();
+		platforms.create(100, 500, 'platform_stone');
+		platforms.create(700, 500, 'platform_stone');
+		platforms.create(250, 400, 'platform_stone');
+		platforms.create(550, 300, 'platform_stone');
+		platforms.create(400, 200, 'platform_stone');
+		platforms.create(100, 120, 'platform_stone');
+		platforms.create(700, 120, 'platform_stone');
 
-    scene.physics.add.collider(playerContainer, platforms);
-    scene.physics.add.collider(enemies, platforms);
-    scene.physics.add.collider(playerContainer, enemies, hitPlayer, null, scene);
+		enemies = scene.physics.add.group();
+		enemies.create(100, 480, 'orc_tex');
+		enemies.create(700, 480, 'orc_tex');
+		enemies.create(250, 380, 'orc_tex');
+		enemies.create(550, 280, 'orc_tex');
+		enemies.create(400, 180, 'orc_tex');
+		enemies.create(100, 100, 'orc_tex');
+		enemies.create(700, 100, 'orc_tex');
+	}
+
+	enemies.children.iterate(function(enemy) {
+		enemy.setCollideWorldBounds(true);
+		enemy.setBounce(1);
+		enemy.setVelocityX(enemySpeed);
+	});
+
+	scene.physics.add.collider(playerContainer, platforms);
+	scene.physics.add.collider(enemies, platforms);
+	scene.physics.add.collider(playerContainer, enemies, hitPlayer, null, scene);
 }
 const config = {
     type: Phaser.AUTO,
@@ -73,23 +106,173 @@ let enemySpeed = 60;
 let currentLevel = 1;
 
 function preload() {
-    // Placeholder assets
-    this.load.image('background', 'https://dummyimage.com/800x600/7c6f4b/3a2f1b&text=Medieval+Background');
+    // Minimal placeholders still used elsewhere; enemy replaced by procedural orc
     this.load.image('ground', 'https://dummyimage.com/400x32/444/222&text=Platform');
     this.load.image('player', 'https://dummyimage.com/32x48/8b5c2b/fff&text=Knight');
     this.load.image('sword', 'https://dummyimage.com/40x10/fff/8b5c2b&text=Sword');
     this.load.image('arrow', 'https://dummyimage.com/32x8/fff/222&text=Arrow');
-    this.load.image('enemy', 'https://dummyimage.com/32x48/ff4444/fff&text=Enemy');
+}
+
+function generateWeaponTextures(scene) {
+    // Sword texture (default pointing right)
+    if (!scene.textures.exists('sword_tex')) {
+        const swordWidth = 64;
+        const swordHeight = 20;
+        const g = scene.add.graphics();
+        g.clear();
+        // Blade
+        g.fillStyle(0xdfe6eb, 1);
+        g.fillRect(18, 7, 40, 6);
+        g.fillStyle(0xc0c9cf, 1);
+        g.fillRect(18, 9, 40, 2);
+        // Tip
+        g.fillStyle(0xdfe6eb, 1);
+        g.fillPoints([{x:58,y:7},{x:63,y:10},{x:58,y:13}], true);
+        // Crossguard
+        g.fillStyle(0x8b6f47, 1);
+        g.fillRect(14, 5, 6, 10);
+        g.fillRect(6, 8, 22, 4);
+        // Grip
+        g.fillStyle(0x4a3a26, 1);
+        g.fillRect(4, 7, 10, 6);
+        // Pommel
+        g.fillStyle(0x6b5840, 1);
+        g.fillCircle(4, 10, 3);
+        g.generateTexture('sword_tex', swordWidth, swordHeight);
+        g.destroy();
+    }
+
+    // Arrow texture (default pointing right)
+    if (!scene.textures.exists('arrow_tex')) {
+        const arrowWidth = 36;
+        const arrowHeight = 12;
+        const g2 = scene.add.graphics();
+        g2.clear();
+        // Shaft
+        g2.fillStyle(0x8b5a2b, 1);
+        g2.fillRect(4, 5, 24, 2);
+        // Head
+        g2.fillStyle(0xb0b7bd, 1);
+        g2.fillPoints([{x:28,y:4},{x:35,y:6},{x:28,y:8}], true);
+        // Fletching
+        g2.fillStyle(0xdedede, 1);
+        g2.fillPoints([{x:6,y:4},{x:2,y:6},{x:6,y:8}], true);
+        g2.fillPoints([{x:10,y:4},{x:6,y:6},{x:10,y:8}], true);
+        g2.generateTexture('arrow_tex', arrowWidth, arrowHeight);
+        g2.destroy();
+    }
+}
+
+function generateOrcTexture(scene) {
+	if (scene.textures.exists('orc_tex')) return;
+	const width = 32;
+	const height = 48;
+	const g = scene.add.graphics();
+	g.clear();
+	// Body
+	g.fillStyle(0x2e7d32, 1); // orc green
+	g.fillRect(6, 12, 20, 28);
+	// Head
+	g.fillStyle(0x33691e, 1);
+	g.fillRect(8, 0, 16, 14);
+	// Eyes
+	g.fillStyle(0xffffff, 1);
+	g.fillRect(10, 5, 3, 3);
+	g.fillRect(19, 5, 3, 3);
+	g.fillStyle(0x000000, 1);
+	g.fillRect(11, 6, 1, 1);
+	g.fillRect(20, 6, 1, 1);
+	// Tusks
+	g.fillStyle(0xfff2cc, 1);
+	g.fillRect(12, 11, 2, 3);
+	g.fillRect(18, 11, 2, 3);
+	// Belt
+	g.fillStyle(0x5d4037, 1);
+	g.fillRect(6, 28, 20, 4);
+	// Boots
+	g.fillStyle(0x3e2723, 1);
+	g.fillRect(6, 40, 8, 6);
+	g.fillRect(18, 40, 8, 6);
+	// Shoulder pads
+	g.fillStyle(0x8d6e63, 1);
+	g.fillRect(2, 12, 10, 6);
+	g.fillRect(20, 12, 10, 6);
+	// Weapon hint (club) on back
+	g.fillStyle(0x795548, 1);
+	g.fillRect(20, 20, 8, 3);
+	g.fillRect(26, 18, 2, 7);
+	// Border shading
+	g.lineStyle(1, 0x1b5e20, 1);
+	g.strokeRect(6, 12, 20, 28);
+	g.strokeRect(8, 0, 16, 14);
+	// Generate
+	g.generateTexture('orc_tex', width, height);
+	g.destroy();
+}
+
+function generateStonePlatformTexture(scene) {
+    if (scene.textures.exists('platform_stone')) return;
+    const width = 400;
+    const height = 32;
+    const g = scene.add.graphics();
+    g.fillStyle(0x9e9ea0, 1);
+    g.fillRect(0, 0, width, height);
+    g.generateTexture('platform_stone', width, height);
+    g.destroy();
 }
 
 function create() {
-    this.add.image(400, 300, 'background');
+    // Draw background: blue sky, clouds, and a small distant castle
+    const sky = this.add.graphics();
+    sky.setDepth(-20);
+    sky.fillStyle(0x87ceeb, 1);
+    sky.fillRect(0, 0, 800, 600);
 
-    platforms = this.physics.add.staticGroup();
-    platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-    platforms.create(600, 450, 'ground');
-    platforms.create(200, 350, 'ground');
-    platforms.create(400, 220, 'ground');
+    const clouds = this.add.graphics();
+    clouds.setDepth(-19);
+    clouds.fillStyle(0xffffff, 1);
+
+    const drawCloud = (g, x, y, s) => {
+        g.fillCircle(x, y, 22 * s);
+        g.fillCircle(x + 24 * s, y - 10 * s, 28 * s);
+        g.fillCircle(x + 52 * s, y, 22 * s);
+        g.fillCircle(x + 14 * s, y + 10 * s, 18 * s);
+        g.fillCircle(x + 38 * s, y + 10 * s, 18 * s);
+    };
+
+    drawCloud(clouds, 120, 100, 1.2);
+    drawCloud(clouds, 360, 80, 1.0);
+    drawCloud(clouds, 620, 120, 1.4);
+
+    const castle = this.add.graphics();
+    castle.setDepth(-18);
+    // Distant castle silhouette
+    castle.fillStyle(0xc8c8c8, 0.9);
+    // Main keep
+    castle.fillRect(615, 380, 90, 60);
+    // Left and right towers
+    castle.fillRect(595, 355, 28, 85);
+    castle.fillRect(710, 355, 28, 85);
+    // Battlements on keep
+    [620, 638, 656, 674, 692].forEach(x => castle.fillRect(x, 370, 10, 10));
+    // Battlements on towers
+    [595, 610].forEach(x => castle.fillRect(x, 345, 10, 10));
+    [710, 725].forEach(x => castle.fillRect(x, 345, 10, 10));
+    // Door and windows
+    castle.fillStyle(0x6b4f2a, 1);
+    castle.fillRect(655, 410, 20, 30);
+    castle.fillStyle(0x444444, 1);
+    castle.fillRect(630, 395, 10, 14);
+    castle.fillRect(690, 395, 10, 14);
+    castle.fillRect(605, 375, 8, 12);
+    castle.fillRect(720, 375, 8, 12);
+
+    // Create procedural weapon textures
+    generateWeaponTextures(this);
+    // Ensure platform texture exists before creating any platforms
+    generateStonePlatformTexture(this);
+    // Generate orc enemy texture
+    generateOrcTexture(this);
 
     // Create a container for the player with armor and helmet
     playerContainer = this.add.container(100, 450);
@@ -112,10 +295,8 @@ function create() {
     playerContainer.body.setSize(32, 48);
     playerContainer.body.setOffset(-16, -24);
 
-    this.physics.add.collider(playerContainer, platforms);
-
     cursors = this.input.keyboard.createCursorKeys();
-    sword = this.add.image(playerContainer.x, playerContainer.y, 'sword');
+    sword = this.add.image(playerContainer.x, playerContainer.y, 'sword_tex');
     sword.setVisible(false);
     arrows = this.physics.add.group();
 
@@ -125,24 +306,7 @@ function create() {
 
     setupLevel(currentLevel, this);
 
-    // Input for sword and bow
-    this.input.on('keydown-SPACE', () => {
-        sword.setPosition(player.x + (player.flipX ? -30 : 30), player.y);
-        sword.setFlipX(player.flipX);
-        sword.setVisible(true);
-        this.time.delayedCall(200, () => sword.setVisible(false));
-    });
 
-    this.input.on('keydown-SHIFT', () => {
-        const now = this.time.now;
-        if (now - lastArrowTime > 400) { // fire rate
-            let arrow = arrows.create(player.x, player.y, 'arrow');
-            arrow.setVelocityX(player.flipX ? -400 : 400);
-            arrow.setGravityY(-600); // ignore gravity
-            arrow.setFlipX(player.flipX);
-            lastArrowTime = now;
-        }
-    });
 }
 
 function update() {
@@ -153,79 +317,6 @@ function update() {
             setupLevel(currentLevel, this);
         }
     }
-// Setup platforms and enemies for each level
-function setupLevel(level, scene) {
-    // Remove old platforms and enemies
-    if (platforms) platforms.clear(true, true);
-    if (enemies) enemies.clear(true, true);
-
-    platforms = scene.physics.add.staticGroup();
-    if (level === 1) {
-        platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-        platforms.create(600, 450, 'ground');
-        platforms.create(200, 350, 'ground');
-        platforms.create(400, 220, 'ground');
-
-        enemies = scene.physics.add.group();
-        enemies.create(600, 400, 'enemy');
-        enemies.create(200, 300, 'enemy');
-        enemies.create(400, 180, 'enemy');
-    } else if (level === 2) {
-        platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-        platforms.create(700, 500, 'ground');
-        platforms.create(100, 400, 'ground');
-        platforms.create(300, 300, 'ground');
-        platforms.create(600, 200, 'ground');
-
-        enemies = scene.physics.add.group();
-        enemies.create(700, 480, 'enemy');
-        enemies.create(100, 380, 'enemy');
-        enemies.create(600, 180, 'enemy');
-        enemies.create(300, 280, 'enemy');
-    } else if (level === 3) {
-        platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-        platforms.create(150, 500, 'ground');
-        platforms.create(650, 400, 'ground');
-        platforms.create(400, 300, 'ground');
-        platforms.create(200, 200, 'ground');
-        platforms.create(600, 120, 'ground');
-
-        enemies = scene.physics.add.group();
-        enemies.create(150, 480, 'enemy');
-        enemies.create(650, 380, 'enemy');
-        enemies.create(400, 280, 'enemy');
-        enemies.create(200, 180, 'enemy');
-        enemies.create(600, 100, 'enemy');
-    } else if (level === 4) {
-        platforms.create(400, 584, 'ground').setScale(2).refreshBody();
-        platforms.create(100, 500, 'ground');
-        platforms.create(700, 500, 'ground');
-        platforms.create(250, 400, 'ground');
-        platforms.create(550, 300, 'ground');
-        platforms.create(400, 200, 'ground');
-        platforms.create(100, 120, 'ground');
-        platforms.create(700, 120, 'ground');
-
-        enemies = scene.physics.add.group();
-        enemies.create(100, 480, 'enemy');
-        enemies.create(700, 480, 'enemy');
-        enemies.create(250, 380, 'enemy');
-        enemies.create(550, 280, 'enemy');
-        enemies.create(400, 180, 'enemy');
-        enemies.create(100, 100, 'enemy');
-        enemies.create(700, 100, 'enemy');
-    }
-
-    enemies.children.iterate(function(enemy) {
-        enemy.setCollideWorldBounds(true);
-        enemy.setBounce(1);
-        enemy.setVelocityX(enemySpeed);
-    });
-
-    scene.physics.add.collider(playerContainer, platforms);
-    scene.physics.add.collider(enemies, platforms);
-    scene.physics.add.collider(playerContainer, enemies, hitPlayer, null, scene);
-}
     if (cursors.left.isDown) {
         playerContainer.body.setVelocityX(-160);
         playerContainer.flipX = true;
@@ -256,7 +347,7 @@ function setupLevel(level, scene) {
         if (Phaser.Input.Keyboard.JustDown(shiftKey)) {
             const now = this.time.now;
             if (now - lastArrowTime > 400) {
-                let arrow = arrows.create(playerContainer.x, playerContainer.y, 'arrow');
+                let arrow = arrows.create(playerContainer.x, playerContainer.y, 'arrow_tex');
                 arrow.setVelocityX(playerContainer.flipX ? -400 : 400);
                 arrow.setGravityY(-600);
                 arrow.setFlipX(playerContainer.flipX);
