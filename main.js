@@ -274,17 +274,73 @@ function create() {
     // Generate orc enemy texture
     generateOrcTexture(this);
 
-    // Create a container for the player with armor and helmet
+    // Create a container for the player and draw a more detailed armored knight
     playerContainer = this.add.container(100, 450);
 
-    // Body (armor): gray rectangle
-    let body = this.add.rectangle(0, 0, 32, 48, 0x888888);
-    // Helmet: dark gray ellipse
-    let helmet = this.add.ellipse(0, -28, 32, 20, 0x444444);
-    // Face: peach circle
-    let face = this.add.circle(0, -18, 12, 0xffcc99);
+    const armorDark = 0x777b80;
+    const armorLight = 0x9aa1a8;
+    const armorTrim = 0xbec6cc;
+    const leatherBrown = 0x4a3f2a;
+    const bootDark = 0x313437;
+    const faceTone = 0xffcc99;
+    const visorDark = 0x111111;
+    const plumeRed = 0xaa1a1a;
 
-    playerContainer.add([body, helmet, face]);
+    const setBaseFill = (shape, color) => {
+        if (shape && shape.setFillStyle) {
+            shape.setData('baseFill', color);
+        }
+        return shape;
+    };
+
+    // Shield (behind body)
+    let shield = setBaseFill(this.add.ellipse(-22, 2, 14, 20, leatherBrown), leatherBrown);
+    let shieldBoss = setBaseFill(this.add.circle(-22, 2, 3, armorTrim), armorTrim);
+
+    // Body armor
+    let body = setBaseFill(this.add.rectangle(0, 0, 32, 48, armorDark), armorDark);
+    // Chest plate overlay
+    let chest = setBaseFill(this.add.rectangle(0, -4, 28, 24, armorLight), armorLight);
+    // Chest trim stripe
+    let chestTrim = setBaseFill(this.add.rectangle(0, -12, 26, 2, armorTrim), armorTrim);
+    // Shoulder pauldrons
+    let pauldronL = setBaseFill(this.add.ellipse(-14, -8, 18, 10, armorLight), armorLight);
+    let pauldronR = setBaseFill(this.add.ellipse(14, -8, 18, 10, armorLight), armorLight);
+    // Belt
+    let belt = setBaseFill(this.add.rectangle(0, 8, 32, 6, leatherBrown), leatherBrown);
+    // Gauntlets
+    let gauntletL = setBaseFill(this.add.rectangle(-12, 4, 8, 6, armorLight), armorLight);
+    let gauntletR = setBaseFill(this.add.rectangle(12, 4, 8, 6, armorLight), armorLight);
+    // Greaves / Boots
+    let bootL = setBaseFill(this.add.rectangle(-8, 18, 10, 10, bootDark), bootDark);
+    let bootR = setBaseFill(this.add.rectangle(8, 18, 10, 10, bootDark), bootDark);
+
+    // Helmet and details
+    let helmet = setBaseFill(this.add.ellipse(0, -28, 32, 20, armorDark), armorDark);
+    let face = setBaseFill(this.add.circle(0, -18, 12, faceTone), faceTone);
+    let visor = setBaseFill(this.add.rectangle(0, -28, 18, 4, visorDark), visorDark);
+    let helmBand = setBaseFill(this.add.rectangle(0, -24, 20, 2, armorTrim), armorTrim);
+    let plume = setBaseFill(this.add.triangle(0, -40, -4, 4, 4, 4, 0, -8, plumeRed), plumeRed);
+
+    playerContainer.add([
+        shield,
+        shieldBoss,
+        body,
+        chest,
+        chestTrim,
+        pauldronL,
+        pauldronR,
+        belt,
+        gauntletL,
+        gauntletR,
+        bootL,
+        bootR,
+        helmet,
+        face,
+        visor,
+        helmBand,
+        plume
+    ]);
 
     // Enable physics for the container
     this.physics.world.enable(playerContainer);
@@ -403,17 +459,17 @@ const game = new Phaser.Game(config);
 
 // Player hit by enemy
 function hitPlayer(player, enemy) {
-    // Tint all children of playerContainer
+    // Flash red on hit, then restore base colors stored on each shape
     player.list.forEach(child => {
         if (child.setFillStyle) child.setFillStyle(0xff0000);
     });
     this.time.delayedCall(300, () => {
-        player.list.forEach((child, i) => {
-            // Restore original colors
+        player.list.forEach(child => {
             if (child.setFillStyle) {
-                if (i === 0) child.setFillStyle(0x888888); // armor
-                if (i === 1) child.setFillStyle(0x444444); // helmet
-                if (i === 2) child.setFillStyle(0xffcc99); // face
+                const base = child.getData && child.getData('baseFill');
+                if (base !== undefined) {
+                    child.setFillStyle(base);
+                }
             }
         });
     });
